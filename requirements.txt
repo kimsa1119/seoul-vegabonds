@@ -1,0 +1,6 @@
+streamlit
+openai
+requests
+pandas
+pydeck
+pillow
