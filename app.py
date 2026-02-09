@@ -728,7 +728,7 @@ def to_road_address(text: str) -> str:
     return cleaned
 
 
-def render_bullet_list(items: List[str]) -> None:
+def render_bullet_list(items: List[str], text_color: str = "#333") -> None:
     if not items:
         return
     safe_items = [to_korean_display(i) if isinstance(i, str) else str(i) for i in items if str(i).strip()]
@@ -736,7 +736,7 @@ def render_bullet_list(items: List[str]) -> None:
         return
     bullets_html = "".join([f"<li style='margin-bottom:6px;'>{i}</li>" for i in safe_items])
     st.markdown(
-        f"<ul style='margin:0 0 0 18px; padding:0; color:#333;'>{bullets_html}</ul>",
+        f"<ul style='margin:0 0 0 18px; padding:0; color:{text_color};'>{bullets_html}</ul>",
         unsafe_allow_html=True,
     )
 
@@ -2067,7 +2067,7 @@ def main():
 
         # 데이터 fetch
         pop_raw = fetch_seoul_realtime_population(seoul_key)
-        places = get_tour_places()
+        places = get_tour_places(seoul_key)
         assert all("area" in p for p in places), "area field missing in places"
         unique_gus = sorted({p.get("gu") for p in places if p.get("gu")})
         gu_list = tuple(sorted({p.get("gu", "") for p in places if p.get("gu")}))
@@ -2142,7 +2142,7 @@ def main():
         st.session_state.disliked[signature] = disliked_set
 
         pop_raw = fetch_seoul_realtime_population(seoul_key)
-        places = get_tour_places()
+        places = get_tour_places(seoul_key)
         assert all("area" in p for p in places), "area field missing in places"
         unique_gus = sorted({p.get("gu") for p in places if p.get("gu")})
         gu_list = tuple(sorted({p.get("gu", "") for p in places if p.get("gu")}))
@@ -2203,7 +2203,7 @@ def main():
             st.session_state.disliked[signature] = disliked_set
 
         pop_raw = fetch_seoul_realtime_population(seoul_key)
-        places = get_tour_places()
+        places = get_tour_places(seoul_key)
         assert all("area" in p for p in places), "area field missing in places"
         unique_gus = sorted({p.get("gu") for p in places if p.get("gu")})
         gu_list = tuple(sorted({p.get("gu", "") for p in places if p.get("gu")}))
@@ -2469,7 +2469,7 @@ def main():
                 st.markdown("#### 추천 이유")
                 bullets = gen.get("bullets") or split_sentences_for_bullets(gen.get("one_liner", ""))
                 if bullets:
-                    render_bullet_list(bullets[:3])
+                    render_bullet_list(bullets[:3], text_color="#fff")
                 else:
                     st.write("추천 이유를 생성할 수 없습니다.")
 
@@ -2480,14 +2480,14 @@ def main():
                     c1, c2 = st.columns(2, gap="medium")
                     with c1:
                         st.markdown("**전시·문화**")
-                        render_bullet_list(course.get("culture", [])[:3])
+                        render_bullet_list(course.get("culture", [])[:3], text_color="#fff")
                         st.markdown("**카페**")
-                        render_bullet_list(course.get("cafe", [])[:3])
+                        render_bullet_list(course.get("cafe", [])[:3], text_color="#fff")
                     with c2:
                         st.markdown("**식당**")
-                        render_bullet_list(course.get("food", [])[:3])
+                        render_bullet_list(course.get("food", [])[:3], text_color="#fff")
                         st.markdown("**공연·체험**")
-                        render_bullet_list(course.get("activity", [])[:3])
+                        render_bullet_list(course.get("activity", [])[:3], text_color="#fff")
                 else:
                     st.write("코스 데이터가 없습니다.")
 
