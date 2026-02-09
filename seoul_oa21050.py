@@ -298,19 +298,20 @@ def normalize_row(raw: Dict[str, Any]) -> Dict[str, Any]:
 class _Cache:
     value: Any
     expires_at: float
+    key: str
 
 
 _service_cache: Optional[_Cache] = None
 _places_cache: Optional[_Cache] = None
 
 
-def get_service_name_for_oa21050(debug: bool = False) -> Optional[str]:
+def get_service_name_for_oa21050(api_key: Optional[str] = None, debug: bool = False) -> Optional[str]:
     global _service_cache
     now = time.time()
-    if _service_cache and _service_cache.expires_at > now:
+    if _service_cache and _service_cache.expires_at > now and _service_cache.key == (api_key or ""):
         return _service_cache.value
 
-    key = os.getenv("SEOUL_OPENAPI_KEY", "").strip()
+    key = (api_key or "").strip() or os.getenv("SEOUL_OPENAPI_KEY", "").strip()
     if not key:
         logger.warning("SEOUL_OPENAPI_KEY is missing")
         return None
@@ -349,25 +350,25 @@ def get_service_name_for_oa21050(debug: bool = False) -> Optional[str]:
         fallback = os.getenv("OA21050_SERVICE_NAME", "").strip()
         if fallback:
             logger.info("Using OA21050_SERVICE_NAME fallback: %s", fallback)
-            _service_cache = _Cache(fallback, now + 24 * 3600)
+            _service_cache = _Cache(fallback, now + 24 * 3600, key)
             return fallback
         return None
 
-    _service_cache = _Cache(service_name, now + 24 * 3600)
+    _service_cache = _Cache(service_name, now + 24 * 3600, key)
     return service_name
 
 
-def get_tour_places() -> List[Dict[str, Any]]:
+def get_tour_places(api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     global _places_cache
     now = time.time()
-    if _places_cache and _places_cache.expires_at > now:
+    if _places_cache and _places_cache.expires_at > now and _places_cache.key == (api_key or ""):
         return _places_cache.value
 
-    service_name = get_service_name_for_oa21050(debug=False)
+    service_name = get_service_name_for_oa21050(api_key=api_key, debug=False)
     if not service_name:
         return []
 
-    key = os.getenv("SEOUL_OPENAPI_KEY", "").strip()
+    key = (api_key or "").strip() or os.getenv("SEOUL_OPENAPI_KEY", "").strip()
     if not key:
         logger.warning("SEOUL_OPENAPI_KEY is missing")
         return []
@@ -406,7 +407,7 @@ def get_tour_places() -> List[Dict[str, Any]]:
         sample_keys,
     )
 
-    _places_cache = _Cache(places, now + 6 * 3600)
+    _places_cache = _Cache(places, now + 6 * 3600, key)
     return places
 
 
