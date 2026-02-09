@@ -23,6 +23,7 @@ from seoul_oa21050 import get_tour_places
 st.set_page_config(
     page_title="서울 방랑자 | Seoul Nomads",
     layout="wide",
+    
 )
 
 # -----------------------------
